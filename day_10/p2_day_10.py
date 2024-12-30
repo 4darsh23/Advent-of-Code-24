@@ -1,37 +1,37 @@
-from functools import lru_cache
+data = open('10').read().split('\n')
 
-with open("./day_10.in") as fin:
-    grid = fin.read().strip().split("\n")
+kaart = {}
+queue = []
+for r,line in enumerate(data):
+    for c,v in enumerate(line):
+        kaart[(r,c)] = int(v)
+        if v == '0':    
+            queue.append((r,c))
 
+dirs = ((-1,0),(1,0),(0,1),(0,-1))
 
-n = len(grid)
+def travel(x,part=1):
+    route = [x]
+    ends = 0
+    for r,c in route:
+        h = kaart[(r,c)]
+        for dr,dc in dirs:
+            nr,nc = r+dr,c+dc
+            if (nr,nc) in kaart and kaart[(nr,nc)] == h+1:
+                if part == 1:
+                    if (nr,nc) not in route: 
+                        route.append((nr,nc))
+                        if h + 1 == 9:
+                            ends += 1
+                if part == 2:
+                    route.append((nr,nc))
+                    if h + 1 == 9:
+                        ends += 1
+    return ends
 
-
-dd = [[0, 1], [1, 0], [0, -1], [-1, 0]]
-def in_grid(i, j):
-    return (0 <= i < n) and (0 <= j < n)
-
-@lru_cache(None)
-def rating(i, j):
-    if grid[i][j] == "9":
-        return 1
-    
-    ans = 0
-    for di, dj in dd:
-        ii, jj = i + di, j + dj
-        if not in_grid(ii, jj):
-            continue
-
-        if int(grid[ii][jj]) == int(grid[i][j]) + 1:
-            ans += rating(ii, jj)
-    
-    return ans
-
-
-ans = 0
-for i in range(n):
-    for j in range(n):
-        if grid[i][j] == "0":
-            ans += rating(i, j)
-
-print(ans)
+p1 = p2 = 0
+for i in queue:
+    p1 += travel(i,1)
+    p2 += travel(i,2)
+print(p1)
+print(p2)
